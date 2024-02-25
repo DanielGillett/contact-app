@@ -1,15 +1,54 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import "./index.css";
+import React from "react";
+import App from "./App";
+import ReactDOM from "react-dom/client";
+import { Root } from "./components/Root";
+import { Hero } from "./components/Hero";
+import reportWebVitals from "./reportWebVitals";
+import { ChakraProvider } from "@chakra-ui/react";
+import { ContactAdd } from "./components/ContactAdd";
+import { ContactEdit } from "./components/ContactEdit";
+import { ContactDetails } from "./components/ContactDetails";
+import { ContactProvider } from "./components/ContactContext";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
+    children: [
+      {
+        index: true,
+        path: "contacts",
+        element: <Hero />,
+      },
+      {
+        path: "contacts/new",
+        element: <ContactAdd />,
+      },
+      {
+        path: "contacts/:id/edit",
+        element: <ContactEdit />,
+      },
+      {
+        path: "contacts/:id",
+        element: <ContactDetails />,
+      },
+    ],
+  },
+]);
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <ChakraProvider>
+      <ContactProvider>
+        {/* <App /> */}
+        <RouterProvider router={router} />
+      </ContactProvider>
+    </ChakraProvider>
   </React.StrictMode>
 );
 
