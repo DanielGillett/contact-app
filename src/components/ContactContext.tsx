@@ -19,6 +19,7 @@ import {
   limit,
   getCountFromServer,
   startAfter,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "../utils/firebase";
 
@@ -100,6 +101,8 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
   };
 
   const handleFetch = async (loadOneMore?: boolean) => {
+    const contactsCollectionRef = collection(db, "contacts");
+
     const pagination = loadOneMore
       ? [startAfter(contacts[contacts.length - 1])]
       : [];
@@ -110,8 +113,12 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
       ...pagination,
     ];
 
-    const contactsCollectionRef = collection(db, "contacts");
-    const contactQuery = query(contactsCollectionRef, ...filter, limit(1));
+    const contactQuery = query(
+      contactsCollectionRef,
+      ...filter,
+      orderBy("name"),
+      limit(1)
+    );
     const contactCount = query(contactsCollectionRef, ...filter);
     const totalCount = await getCountFromServer(contactCount);
     const docsSnapshot = await getDocs(contactQuery);

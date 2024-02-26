@@ -120,9 +120,11 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           {contact.data().name}
         </NavItem>
       ))}
-      <Button width="100%" onClick={handleLoadOneMore}>
-        Load one more of {total}
-      </Button>
+      {total !== 0 && (
+        <Button width="100%" onClick={handleLoadOneMore}>
+          Load one more of {total}
+        </Button>
+      )}
     </Box>
   );
 };
