@@ -104,7 +104,7 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
     const contactsCollectionRef = collection(db, "contacts");
 
     const pagination = loadOneMore
-      ? [startAfter(contacts[contacts.length - 1])]
+      ? [orderBy("name"), startAfter(contacts[contacts.length - 1])]
       : [];
 
     const filter = [
@@ -113,12 +113,7 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
       ...pagination,
     ];
 
-    const contactQuery = query(
-      contactsCollectionRef,
-      ...filter,
-      orderBy("name"),
-      limit(1)
-    );
+    const contactQuery = query(contactsCollectionRef, ...filter, limit(1));
     const contactCount = query(contactsCollectionRef, ...filter);
     const totalCount = await getCountFromServer(contactCount);
     const docsSnapshot = await getDocs(contactQuery);
