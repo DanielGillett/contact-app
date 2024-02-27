@@ -104,18 +104,19 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
     const contactsCollectionRef = collection(db, "contacts");
 
     const pagination = loadOneMore
-      ? [orderBy("name"), startAfter(contacts[contacts.length - 1])]
+      ? [startAfter(contacts[contacts.length - 1])]
       : [];
 
     const filter = [
       where("name", ">=", search),
       where("name", "<=", search + "\uf8ff"),
+      orderBy("name"),
       ...pagination,
     ];
 
     const contactQuery = query(contactsCollectionRef, ...filter, limit(1));
-    const contactCount = query(contactsCollectionRef, ...filter);
-    const totalCount = await getCountFromServer(contactCount);
+    // const contactCount = query(contactsCollectionRef, ...filter);
+    const totalCount = await getCountFromServer(contactsCollectionRef);
     const docsSnapshot = await getDocs(contactQuery);
 
     setContacts(
