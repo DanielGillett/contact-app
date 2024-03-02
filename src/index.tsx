@@ -11,6 +11,7 @@ import { ContactEdit } from "./components/ContactEdit";
 import { ContactDetails } from "./components/ContactDetails";
 import { ContactProvider } from "./components/ContactContext";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./components/AuthContext";
 
 const router = createBrowserRouter([
   {
@@ -44,10 +45,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ChakraProvider>
-      <ContactProvider>
-        {/* <App /> */}
-        <RouterProvider router={router} />
-      </ContactProvider>
+      <AuthProvider>
+        <ContactProvider>
+          <RouterProvider router={router} />
+        </ContactProvider>
+      </AuthProvider>
     </ChakraProvider>
   </React.StrictMode>
 );

@@ -115,14 +115,13 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
     ];
 
     const contactQuery = query(contactsCollectionRef, ...filter, limit(1));
-    // const contactCount = query(contactsCollectionRef, ...filter);
     const totalCount = await getCountFromServer(contactsCollectionRef);
     const docsSnapshot = await getDocs(contactQuery);
 
     setContacts(
       loadOneMore ? [...contacts, ...docsSnapshot.docs] : docsSnapshot.docs
     );
-    setTotal(totalCount.data().count - docsSnapshot.size);
+    setTotal(totalCount.data().count - contacts.length - 1);
   };
 
   useEffect(() => {
