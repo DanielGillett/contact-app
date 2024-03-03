@@ -4,24 +4,26 @@ import React, {
   createContext,
   useEffect,
   useState,
+  useContext,
 } from "react";
 import {
   doc,
   query,
+  limit,
   where,
   addDoc,
   getDoc,
   getDocs,
+  orderBy,
   deleteDoc,
   updateDoc,
   collection,
-  serverTimestamp,
-  limit,
-  getCountFromServer,
   startAfter,
-  orderBy,
+  serverTimestamp,
+  getCountFromServer,
 } from "firebase/firestore";
 import { db } from "../utils/firebase";
+import { AuthContext } from "./AuthContext";
 
 interface IContact {
   id: string;
@@ -32,10 +34,10 @@ interface IContact {
 interface IContactContext {
   total: number;
   contacts: any[];
-  handleFetch: (loadOneMore: boolean) => Promise<void>;
   setSearch: (search: string) => void;
   addContact: (name: string, description: string) => Promise<string>;
   editContact: (id: string, name: string, description: string) => Promise<void>;
+  handleFetch: (loadOneMore: boolean) => Promise<void>;
   deleteContact: (id: string) => Promise<void>;
   getContactById: (id: string) => Promise<IContact | undefined>;
 }
@@ -57,9 +59,11 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
   const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
   const [contacts, setContacts] = useState<any[]>([]);
+  const { user } = useContext(AuthContext);
+  const collectionName = `users/${user!.uid}/contacts`; // <-- User will not be null
 
   const getContactById = async (id: string) => {
-    const docRef = doc(db, "contacts", id);
+    const docRef = doc(db, collectionName, id);
     const docSnapshot = await getDoc(docRef);
 
     if (!docSnapshot.exists()) return;
@@ -71,13 +75,14 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
     name: string,
     description: string
   ): Promise<string> => {
-    const contactRef = await addDoc(collection(db, "contacts"), {
+    const contactRef = await addDoc(collection(db, collectionName), {
       name,
       description,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
 
+    handleFetch();
     return contactRef.id;
   };
 
@@ -86,22 +91,25 @@ export const ContactProvider: FunctionComponent<PropsWithChildren> = ({
     name: string,
     description: string
   ): Promise<void> => {
-    const contactRef = doc(db, "contacts", id);
+    const contactRef = doc(db, collectionName, id);
 
     await updateDoc(contactRef, {
       name,
       description,
       updatedAt: serverTimestamp(),
     });
+
+    handleFetch();
   };
 
   const deleteContact = async (id: string) => {
-    const contactRef = doc(db, "contact", id);
+    const contactRef = doc(db, collectionName, id);
     await deleteDoc(contactRef);
+    handleFetch();
   };
 
   const handleFetch = async (loadOneMore?: boolean) => {
-    const contactsCollectionRef = collection(db, "contacts");
+    const contactsCollectionRef = collection(db, collectionName);
 
     const pagination = loadOneMore
       ? [startAfter(contacts[contacts.length - 1])]

@@ -12,30 +12,42 @@ import {
   onAuthStateChanged,
   User,
 } from "firebase/auth";
-import { auth } from "../utils/firebase";
+import { auth, db } from "../utils/firebase";
 import { FcGoogle } from "react-icons/fc";
 import { Button, Center, Text } from "@chakra-ui/react";
+import { doc, setDoc } from "firebase/firestore";
 
 const provider = new GoogleAuthProvider();
 
-export const AuthContext = createContext({});
+interface IAuthContextProps {
+  user?: User;
+}
+export const AuthContext = createContext<IAuthContextProps>({});
 
 export const AuthProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>();
+  const [user, setUser] = useState<User>();
   const handleSignInWithGoogle = () => {
     signInWithPopup(auth, provider);
   };
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      const { uid, email, displayName } = user;
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        email,
+        displayName,
+      });
       setUser(user);
     });
   }, []);
 
   return user ? (
-    <>{children}</>
+    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
   ) : (
     <Center p={8}>
       <Button
